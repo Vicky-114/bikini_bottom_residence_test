@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Share2, Box, Download, Image, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { isSupabaseConfigured, supabase } from '@/integrations/supabase/client';
 import { useState, useEffect } from 'react';
 import bgImage from '@/assets/bg_bikini_bottom.jpg';
 import { useTranslation } from 'react-i18next';
@@ -68,6 +68,15 @@ const QuizResult = ({ hybrid, onRestart, onImageGenerated }: QuizResultProps) =>
       return;
     }
 
+    if (!isSupabaseConfigured || !supabase) {
+      toast({
+        title: "Image generation unavailable",
+        description: "This published version does not have the AI image service configured.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setIsGenerating(true);
     
     try {
@@ -117,6 +126,15 @@ const QuizResult = ({ hybrid, onRestart, onImageGenerated }: QuizResultProps) =>
       toast({
         title: "Image required",
         description: "Please wait for the image to generate first",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!isSupabaseConfigured || !supabase) {
+      toast({
+        title: "3D generation unavailable",
+        description: "This published version does not have the 3D generation service configured.",
         variant: "destructive"
       });
       return;

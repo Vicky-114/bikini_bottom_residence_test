@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
+import { isSupabaseConfigured, supabase } from '@/integrations/supabase/client';
 import { QuizQuestion as QuizQuestionType, Answer, TraitScores, HybridCharacter } from '@/types/quiz';
 import { computeMatch, createHybridCharacter, saveHybrid } from '@/utils/quizLogic';
 import WelcomeScreen from '@/components/WelcomeScreen';
@@ -36,6 +36,10 @@ const Index = () => {
   const generateQuestion = async (type: 'initial' | 'adaptive') => {
     setIsLoading(true);
     try {
+      if (!isSupabaseConfigured || !supabase) {
+        throw new Error('Supabase is not configured for this deployment');
+      }
+
       const askedQuestions = answers.map(a => a.questionText);
       const { data, error } = await supabase.functions.invoke('generate-quiz-question', {
         body: {
@@ -101,7 +105,9 @@ const Index = () => {
       
       toast({
         title: t('common.fallbackTitle'),
-        description: t('common.fallbackDescription'),
+        description: isSupabaseConfigured
+          ? t('common.fallbackDescription')
+          : 'This published version is using local fallback questions because AI services are not configured.',
       });
     } finally {
       setIsLoading(false);
